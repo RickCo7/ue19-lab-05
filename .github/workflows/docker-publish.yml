@@ -47,9 +47,9 @@ jobs:
         uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: ghcr.io/rickco7/ue19-lab-05:latest
-          format: 'table'
-          exit-code: 1
-          severity: 'HIGH'
+          format: 'table' 
+          exit-code: 1  # if a vulnerability is found
+#          severity: 'HIGH'
         continue-on-error: true
 
       # 7. Push Docker image if no critical vulnerabilities found
