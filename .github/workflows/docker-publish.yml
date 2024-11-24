@@ -34,20 +34,33 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/trivy
-          key: ${{ runner.os }}-trivy-db
+          key: ${{ runner.os }}-trivy-db-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-trivy-db
 
       # 5. Scan Docker image with Trivy for vulnerabilities
       - name: Scan Docker image with Trivy
+        id: trivy-scan
         uses: aquasecurity/trivy-action@0.28.0  # Use the latest stable version
         with:
           image-ref: ghcr.io/rickco7/ue19-lab-05:latest  # Correct input for the image to be scanned
           format: 'table'  # Format of the output (can be 'json', 'table', etc.)
           exit-code: 1  # Fail the workflow if vulnerabilities are found (exit code 1)
+        continue-on-error: true
 
-      # 6. Push Docker image if no vulnerabilities found
+      # 6. Retry Trivy scan if it fails due to rate limits
+      - name: Retry Trivy scan if rate limited
+        if: steps.trivy-scan.outcome == 'failure'
+        run: |
+          for i in {1..5}; do
+            echo "Retrying Trivy scan ($i/5)..."
+            sleep 60
+            trivy image ghcr.io/rickco7/ue19-lab-05:latest --format table --exit-code 1 && break
+          done
+
+      # 7. Push Docker image if no vulnerabilities found
       - name: Push Docker image
+        if: steps.trivy-scan.outcome == 'success'
         uses: docker/build-push-action@v5
         with:
           context: .
