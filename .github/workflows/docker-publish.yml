@@ -31,9 +31,9 @@ jobs:
 
       # 4. Scan Docker image with Trivy for vulnerabilities
       - name: Scan Docker image with Trivy
-        uses: aquasecurity/trivy-action@0.29.0  # Use the latest stable version
+        uses: aquasecurity/trivy-action@0.28.0  # Use the latest stable version
         with:
-          image: ghcr.io/rickco7/ue19-lab-05:latest  # Image to be scanned
+          image-ref: ghcr.io/rickco7/ue19-lab-05:latest  # Correct input for the image to be scanned
           format: 'table'  # Format of the output (can be 'json', 'table', etc.)
           exit-code: 1  # Fail the workflow if vulnerabilities are found (exit code 1)
 
